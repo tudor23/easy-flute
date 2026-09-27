@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <title>Vlad's Flauta Dolça Trainer</title>
+  <style>
+    /* Add whimsical web-game styles matching image_2.png */
+    body { background-color: #0b1d3a; color: white; font-family: 'Comic Sans MS', sans-serif; text-align: center; }
+    .note-bubble { border-radius: 50%; width: 100px; height: 100px; display: inline-flex; align-items: center; justify-content: center; font-size: 2rem; margin: 10px; }
+    .active { background-color: #ff9800; animation: pulse 1s infinite alternate; box-shadow: 0 0 20px #ff9800; }
+    .played { background-color: #4caf50; }
+    .next { background-color: #6d6d6d; opacity: 0.5; }
+    @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.1); } }
+  </style>
+</head>
+<body>
+
+  <h1>VLAD'S FLAUTA DOLÇA TRAINER</h1>
+  <h2>Song: Limu, Limu, Lima</h2>
+
+  <!-- TELEPROMPTER WRAPPER -->
+  <div id="game-track" style="display: flex; justify-content: center; align-items: center;">
+    <!-- Rendered Dynamically in JS -->
+  </div>
+
+  <h2 id="feedback">Press Start & Allow Microphone!</h2>
+  <button id="startButton">START TRAINER</button>
+
+  <script>
+    // Note frequencies definition (Do/C4 to Si/B4) (Modify ranges based on test buffer)
+    const noteMap = {
+      "DO": { min: 245, max: 275 },
+      "RE": { min: 280, max: 310 },
+      "MI": { min: 315, max: 345 },
+      "FA": { min: 340, max: 370 },
+      "SOL": { min: 380, max: 410 },
+      "LA": { min: 425, max: 455 },
+      "SI": { min: 475, max: 510 }
+    };
+
+    const song = ["MI", "SI", "SI", "LA", "SI", "FA", "SOL", "MI", "SOL", "SOL", "FA", "MI"];
+    let currentIndex = 0;
+    let audioContext, analyser, micStream;
+
+    document.getElementById("startButton").onclick = async () => {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      analyser = audioContext.createAnalyser();
+      
+      try {
+        micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const source = audioContext.createMediaStreamSource(micStream);
+        source.connect(analyser);
+        updateUI();
+        detectPitch();
+      } catch (err) {
+        alert("Microphone access denied or unsupported.");
+      }
+    };
+
+    function updateUI() {
+      const track = document.getElementById("game-track");
+      track.innerHTML = song.map((note, idx) => {
+        let state = "next";
+        if (idx < currentIndex) state = "played";
+        else if (idx === currentIndex) state = "active";
+        return `<div class="note-bubble ${state}">${note}</div>`;
+      }).join('');
+    }
+
+    // Auto-Correlation Algorithm (simplified) to find pitch
+    function autoCorrelate(buffer, sampleRate) {
+      let size = buffer.length;
+      let r = new Float32Array(size);
+      for (let i = 0; i < size; i++) {
+        for (let j = 0; j < size - i; j++) {
+          r[i] += buffer[j] * buffer[j + i];
+        }
+      }
+      let d = 0; while (r[d] > r[d + 1]) d++;
+      let maxval = -1, maxpos = -1;
+      for (let i = d; i < size; i++) {
+        if (r[i] > maxval) { maxval = r[i]; maxpos = i; }
+      }
+      let T0 = maxpos;
+      return sampleRate / T0;
+    }
+
+    function detectPitch() {
+      const buffer = new Float32Array(2048);
+      analyser.getFloat32TimeDomainData(buffer);
+      const pitch = autoCorrelate(buffer, audioContext.sampleRate);
+      
+      if (pitch && pitch > 100 && pitch < 1200) {
+        const currentTarget = song[currentIndex];
+        const targetRange = noteMap[currentTarget];
+
+        if (pitch >= targetRange.min && pitch <= targetRange.max) {
+          // Success validation
+          document.getElementById("feedback").innerText = `CORRECT! Played: ${currentTarget}`;
+          currentIndex++;
+          if (currentIndex < song.length) {
+            updateUI();
+          } else {
+            document.getElementById("feedback").innerText = "🎉 Vlad Finished the Song! 🎉";
+            return;
+          }
+        } else {
+          // Identify whatever they are currently playing to help them adjust
+          const heardNote = Object.keys(noteMap).find(n => pitch >= noteMap[n].min && pitch <= noteMap[n].max);
+          document.getElementById("feedback").innerText = heardNote ? `You are playing: ${heardNote}` : `Listening...`;
+        }
+      }
+      requestAnimationFrame(detectPitch);
+    }
+  </script>
+</body>
+</html>
