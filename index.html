@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flauta fácil</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=block" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">🎵 <span id="brand"></span></div>
+    <div class="langs" id="langs"></div>
+  </header>
+
+  <main>
+    <section class="screen" id="screen-welcome" hidden>
+      <div class="panel center">
+        <div class="big-emoji">🎶</div>
+        <h1 data-i18n="welcome.hello"></h1>
+        <form id="name-form" autocomplete="off">
+          <label for="name-input" data-i18n="welcome.askName"></label>
+          <input id="name-input" maxlength="20" data-i18n-placeholder="welcome.placeholder">
+          <p class="form-msg" id="name-msg"></p>
+          <button type="submit" class="big-btn" data-i18n="welcome.go"></button>
+        </form>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-songs" hidden>
+      <div class="panel center">
+        <h1 id="songs-hello"></h1>
+        <p class="lead" data-i18n="songs.pick"></p>
+        <div class="song-list" id="song-list"></div>
+        <button class="link" id="not-you"></button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-play" hidden>
+      <div class="stage">
+        <span class="spark s1">⭐</span><span class="spark s2">✨</span><span class="spark s4">🎶</span>
+        <div class="play-head">
+          <button class="pill" id="btn-back" data-i18n="play.back"></button>
+          <h1 class="song-title" id="play-title"></h1>
+          <div class="head-btns">
+            <button class="pill blue" id="btn-restart" data-i18n="play.restart"></button>
+            <button class="pill orange" id="btn-pause" data-i18n="play.pause"></button>
+          </div>
+        </div>
+
+        <div class="hud">
+          <div class="pill mic">🎤 <span data-i18n="play.mic"></span> <span class="lvl"><i id="lvl"></i></span></div>
+          <div class="pill">⭐ <span id="points">0</span><span class="plus" id="plus"></span></div>
+          <div class="pill">🔥 <span id="streak">0</span></div>
+          <div class="pill metro" id="metro">
+            🥁 <span id="metro-text"></span>
+            <span class="dot" id="dot1"></span><span class="dot" id="dot2"></span>
+            <button class="icon-btn" id="btn-mute" data-i18n-title="play.metronome">🔊</button>
+            <button class="mini-btn" id="btn-retempo" data-i18n="play.newTempo"></button>
+          </div>
+        </div>
+
+        <div class="progress"><i id="progress"></i></div>
+        <div class="loop-bar">
+          <span class="loop-lbl">🔁 <span data-i18n="loop.label"></span></span>
+          <div class="loop-len" id="loop-len"></div>
+          <label class="loop-from"><span data-i18n="loop.from"></span> <select id="loop-start"></select></label>
+          <span class="loop-enter" data-i18n="loop.enter"></span>
+        </div>
+        <div class="lane" id="lane"><div class="lane-strip" id="lane-strip"></div></div>
+        <div class="hint" id="hint" aria-live="polite"></div>
+        <div class="belt" id="belt"><svg class="belt-bed" id="belt-bed" aria-hidden="true"></svg><div class="belt-strip" id="belt-strip"></div></div>
+        <div class="legend" id="legend"></div>
+        <button class="fake-btn" id="btn-fake" hidden data-i18n="play.fake"></button>
+
+        <div class="popup" id="popup"></div>
+        <div class="overlay" id="start-overlay">
+          <div class="panel center">
+            <button class="big-btn" id="btn-start" data-i18n="play.start"></button>
+            <p data-i18n="play.startHint"></p>
+          </div>
+        </div>
+        <div class="overlay" id="pause-overlay" hidden>
+          <div class="panel center">
+            <h2 data-i18n="play.paused"></h2>
+            <button class="big-btn" id="btn-resume" data-i18n="play.resume"></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-done" hidden>
+      <div class="panel center">
+        <div class="big-emoji">🎉</div>
+        <h1 id="done-title"></h1>
+        <p class="lead" id="done-played"></p>
+        <p class="stat" id="done-points"></p>
+        <p id="done-first"></p>
+        <button class="big-btn" id="btn-again" data-i18n="done.again"></button>
+        <button class="big-btn alt" id="btn-songs" data-i18n="done.songs"></button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-mic" hidden>
+      <div class="panel center">
+        <div class="big-emoji">🎤</div>
+        <h1 data-i18n="mic.title"></h1>
+        <p class="lead" id="mic-msg"></p>
+        <button class="big-btn" id="btn-mic-retry" data-i18n="mic.retry"></button>
+        <button class="link" id="btn-mic-back" data-i18n="done.songs"></button>
+      </div>
+    </section>
+  </main>
+
+  <pre class="debug" id="debug" hidden></pre>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

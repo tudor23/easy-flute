@@ -1,0 +1,69 @@
+{
+  "title": "Limu, Limu, Lima",
+  "source": "sample_song_sheet.jpg",
+  "timeSignature": "2/4",
+  "keySignature": "1 sharp (F#)",
+  "durationUnit": "quarter note = 1 beat (eighth = 0.5)",
+  "noteFormat": "solfege + scientific pitch; 'rest' has pitch null",
+  "measures": [
+    { "measure": 1, "lyrics": "Li-mu, li-mu,", "notes": [
+      { "solfege": "mi",  "pitch": "E4",  "duration": 0.5 },
+      { "solfege": "si",  "pitch": "B4",  "duration": 0.5 },
+      { "solfege": "si",  "pitch": "B4",  "duration": 0.5 },
+      { "solfege": "la",  "pitch": "A4",  "duration": 0.5 }
+    ]},
+    { "measure": 2, "lyrics": "li-rna", "notes": [
+      { "solfege": "si",  "pitch": "B4",  "duration": 1 },
+      { "solfege": "fa#", "pitch": "F#4", "duration": 1 }
+    ]},
+    { "measure": 3, "lyrics": "Gud lat so-len", "notes": [
+      { "solfege": "sol", "pitch": "G4",  "duration": 0.5 },
+      { "solfege": "mi",  "pitch": "E4",  "duration": 0.5 },
+      { "solfege": "sol", "pitch": "G4",  "duration": 0.5 },
+      { "solfege": "sol", "pitch": "G4",  "duration": 0.5 }
+    ]},
+    { "measure": 4, "lyrics": "ski-na", "notes": [
+      { "solfege": "fa#", "pitch": "F#4", "duration": 1 },
+      { "solfege": "mi",  "pitch": "E4",  "duration": 1 }
+    ]},
+    { "measure": 5, "lyrics": "O-ver ber-", "notes": [
+      { "solfege": "sol", "pitch": "G4",  "duration": 0.5 },
+      { "solfege": "la",  "pitch": "A4",  "duration": 0.5 },
+      { "solfege": "si",  "pitch": "B4",  "duration": 1 }
+    ]},
+    { "measure": 6, "lyrics": "ge-na bla", "notes": [
+      { "solfege": "sol", "pitch": "G4",  "duration": 0.5 },
+      { "solfege": "fa#", "pitch": "F#4", "duration": 0.5 },
+      { "solfege": "mi",  "pitch": "E4",  "duration": 1 }
+    ]},
+    { "measure": 7, "lyrics": "a-ver kul-", "notes": [
+      { "solfege": "sol", "pitch": "G4",  "duration": 0.5 },
+      { "solfege": "la",  "pitch": "A4",  "duration": 0.5 },
+      { "solfege": "si",  "pitch": "B4",  "duration": 1 }
+    ]},
+    { "measure": 8, "lyrics": "lor-na sma", "notes": [
+      { "solfege": "sol", "pitch": "G4",  "duration": 0.5 },
+      { "solfege": "fa#", "pitch": "F#4", "duration": 0.5 },
+      { "solfege": "mi",  "pitch": "E4",  "duration": 1 }
+    ]},
+    { "measure": 9, "lyrics": "som i sko-", "notes": [
+      { "solfege": "sol", "pitch": "G4",  "duration": 0.5 },
+      { "solfege": "la",  "pitch": "A4",  "duration": 0.5 },
+      { "solfege": "si",  "pitch": "B4",  "duration": 1 }
+    ]},
+    { "measure": 10, "lyrics": "gar-na gii om", "notes": [
+      { "solfege": "sol", "pitch": "G4",  "duration": 0.5 },
+      { "solfege": "fa#", "pitch": "F#4", "duration": 0.5 },
+      { "solfege": "mi",  "pitch": "E4",  "duration": 0.5 },
+      { "solfege": "sol", "pitch": "G4",  "duration": 0.5 }
+    ]},
+    { "measure": 11, "lyrics": "som-rna-", "notes": [
+      { "solfege": "re#", "pitch": "D#4", "duration": 1 },
+      { "solfege": "fa#", "pitch": "F#4", "duration": 1 }
+    ]},
+    { "measure": 12, "lyrics": "ren!", "notes": [
+      { "solfege": "mi",  "pitch": "E4",  "duration": 1 },
+      { "solfege": "rest", "pitch": null, "duration": 1 }
+    ]}
+  ]
+}
