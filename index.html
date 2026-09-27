@@ -11,6 +11,7 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>">
 </head>
 <body>
+  <div class="bg-sky" aria-hidden="true"></div>
   <header class="topbar">
     <div class="brand">🎵 <span id="brand"></span></div>
     <div class="langs" id="langs"></div>
@@ -49,7 +50,12 @@
 
     <section class="screen" id="screen-play" hidden>
       <div class="stage" id="stage">
-        <span class="spark s1">⭐</span><span class="spark s2">✨</span><span class="spark s4">🎶</span>
+        <div class="sky" aria-hidden="true">
+          <span class="spark s1">✦</span><span class="spark s2">✦</span><span class="spark s3">✦</span><span class="spark s4">✦</span>
+          <span class="spark s5">✦</span><span class="spark s6">✦</span>
+          <span class="flo f1">♫</span><span class="flo f2">♪</span><span class="flo f3">♫</span><span class="flo f4">♪</span>
+          <span class="flo f5">♬</span><span class="flo f6">♪</span>
+        </div>
         <div class="play-head">
           <div class="head-btns">
             <button class="pill" id="btn-back" data-i18n="play.back"></button>
@@ -86,6 +92,10 @@
         <div class="roll" id="roll"><canvas id="roll-canvas"></canvas></div>
         <div class="belt" id="belt"><svg class="belt-bed" id="belt-bed" aria-hidden="true"></svg><div class="belt-strip" id="belt-strip"></div></div>
         <div class="legend" id="legend"></div>
+        <div class="guide" id="guide">
+          <h3 class="guide-title" data-i18n="play.guide"></h3>
+          <div class="guide-list" id="guide-list"></div>
+        </div>
         <button class="fake-btn" id="btn-fake" hidden data-i18n="play.fake"></button>
 
         <div class="popup" id="popup"></div>

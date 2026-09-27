@@ -61,6 +61,7 @@ export default {
     'play.legendOpen': 'open',
     'play.fake': '🤫 Play it for me (hold, or press space)',
     'play.legendHalf': 'half',
+    'play.guide': '🎼 How to play each note',
 
     'tip.cover': 'Cover {what}',
     'tip.lift': 'Uncover {what}',
