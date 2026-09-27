@@ -163,6 +163,19 @@ export function createPlayView(root) {
     placeBelt();
   }
 
+  // Every note the song uses, low to high, with its fingering; the one to play now lights up.
+  function renderGuide() {
+    const used = new Set(playable.map((i) => items[i].name));
+    $('guide-list').innerHTML = Object.keys(NOTES).filter((name) => used.has(name))
+      .map((name) => `<div class="gnote" data-note="${esc(name)}">${recorderSvg(name, { thumbLabel: '' })}<b>${noteLabel(name)}</b></div>`)
+      .join('');
+  }
+
+  function updateGuide() {
+    const name = items[index]?.name;
+    $('guide-list').querySelectorAll('.gnote').forEach((el) => el.classList.toggle('on', el.dataset.note === name));
+  }
+
   function renderLane() {
     let html = '';
     items.forEach((item, i) => {
@@ -209,6 +222,7 @@ export function createPlayView(root) {
       playable = items.map((item, i) => (isRest(item) ? -1 : i)).filter((i) => i >= 0);
       renderLane();
       renderBelt();
+      renderGuide();
       $('legend').innerHTML = [[1, 'play.legendCovered'], [0, 'play.legendOpen'], [0.5, 'play.legendHalf']]
         .map(([v, k]) => `<span>${holeIcon(v)}${t(k)}</span>`).join('');
     },
@@ -218,6 +232,7 @@ export function createPlayView(root) {
       travelled = 0;
       updateBelt();
       updateLane();
+      updateGuide();
       this.defaultHint();
     },
     defaultHint() {

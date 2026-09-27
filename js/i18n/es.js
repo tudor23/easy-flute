@@ -61,6 +61,7 @@ export default {
     'play.legendOpen': 'abierto',
     'play.fake': '🤫 Tocar por mí (mantén pulsado o barra espaciadora)',
     'play.legendHalf': 'medio',
+    'play.guide': '🎼 Las posiciones',
 
     'tip.cover': 'Tapa {what}',
     'tip.lift': 'Destapa {what}',
