@@ -76,6 +76,19 @@ input {
 .song-card .go { font-size: 28px; }
 .stat { font-size: 30px; font-weight: 800; margin: 8px 0; }
 
+/* ---------- instrument picker ---------- */
+.panel.wide { max-width: 640px; }
+.instrument-list { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+.pick {
+  display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 18px 10px; min-height: 180px;
+  background: #fff; border: 4px solid var(--ink); border-radius: 22px; box-shadow: 0 6px 0 var(--ink);
+}
+.pick b { font-size: 26px; }
+.pick small { font-weight: 700; opacity: .7; }
+.pick.on { border-color: var(--orange); box-shadow: 0 0 0 6px #ffd16688, 0 6px 0 #c46a00; }
+.pick-emoji { font-size: 64px; line-height: 1.1; }
+.instrument-link { margin: 0 0 8px; font-size: 16px; }
+
 /* ---------- play stage ---------- */
 .stage {
   position: relative; overflow: hidden;
@@ -135,6 +148,11 @@ input {
 }
 .loop-from select:disabled { opacity: .4; }
 .loop-enter { font-size: 12px; opacity: .7; }
+
+/* piano roll: only in piano mode; the flute's lane, belt and hole legend only in flute mode */
+.roll { height: 460px; margin: 0 auto; max-width: 1000px; }
+.roll canvas { display: block; width: 100%; height: 100%; border-radius: 16px; border: 3px solid var(--ink); background: #0f1b3d; }
+.stage:not(.piano) .roll, .stage.piano .lane, .stage.piano .belt, .stage.piano .legend { display: none; }
 
 /* rhythm lane */
 .lane {
@@ -282,6 +300,8 @@ input {
   .metro { width: 100%; }
   .progress { margin: 8px auto 10px; }
   .loop-enter { display: none; }
+  .roll { height: 380px; }
+  .instrument-list { grid-template-columns: 1fr; }
   .spark { display: none; }
 }
 

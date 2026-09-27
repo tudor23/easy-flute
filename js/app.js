@@ -11,6 +11,8 @@ import { NOTES } from './music/notes.js';
 import { createAudioContext, createAnalyser, openMic, createDebugSynth } from './audio/mic.js';
 import { createMetronome } from './audio/metronome.js';
 import { createPlayView } from './ui/playView.js';
+import { createRollView } from './ui/rollView.js';
+import { INSTRUMENTS, instrumentById } from './instruments/index.js';
 
 const DEBUG = new URLSearchParams(location.search).has('debug');
 const NO_SOUND_SECONDS = 8;
@@ -25,7 +27,19 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 
 let screen = 'welcome';
 let name = storage.getName();
-const view = createPlayView($('screen-play'));
+const views = { belt: createPlayView($('screen-play')), roll: createRollView($('screen-play')) };
+let instrument = instrumentById(storage.getInstrument());
+let view = views.belt;
+
+function useInstrument(inst) {
+  instrument = inst;
+  storage.setInstrument(inst.id);
+  view = views[inst.view];
+  $('stage').classList.toggle('piano', inst.view === 'roll');
+  $('btn-instrument').textContent = `${inst.emoji} ${t(`inst.${inst.id}`)} ⇄`;
+  applyStaticText();
+}
+if (instrument) useInstrument(instrument);
 
 // ---------- screens & language ----------
 
@@ -40,7 +54,8 @@ function applyStaticText() {
   document.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = t(el.dataset.i18n); });
   document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => { el.placeholder = t(el.dataset.i18nPlaceholder); });
   document.querySelectorAll('[data-i18n-title]').forEach((el) => { el.title = t(el.dataset.i18nTitle); });
-  $('brand').textContent = name ? t('app.titleFor', { name }) : t('app.title');
+  if (instrument) $('btn-instrument').textContent = `${instrument.emoji} ${t(`inst.${instrument.id}`)} ⇄`;
+  $('brand').textContent = name ? t(`app.titleFor.${instrument?.id ?? 'flute'}`, { name }) : t('app.title');
   document.title = t('app.title');
   $('langs').innerHTML = LANGUAGES.map((l) => `<button data-lang="${l.code}" class="${l.code === getLang() ? 'on' : ''}">${l.name}</button>`).join('');
 }
@@ -48,6 +63,7 @@ function applyStaticText() {
 function refresh() {
   applyStaticText();
   if (screen === 'songs') renderSongs();
+  if (screen === 'instrument') renderInstruments();
   if (screen === 'play' && game) {
     renderLoopBar();
     view.setSong(game.items);
@@ -77,10 +93,35 @@ $('name-form').addEventListener('submit', (e) => {
   name = value;
   storage.setName(name);
   $('name-msg').textContent = '';
-  show('songs');
+  show(instrument ? 'songs' : 'instrument');
+});
+
+// ---------- instrument ----------
+
+function renderInstruments() {
+  $('instrument-list').innerHTML = INSTRUMENTS.map((inst) => `<button class="pick ${inst.id === instrument?.id ? 'on' : ''}" data-inst="${inst.id}">`
+    + `<span class="pick-emoji">${inst.emoji}</span><b>${t(`inst.${inst.id}`)}</b><small>${t(`inst.${inst.id}Sub`)}</small></button>`).join('');
+}
+
+$('instrument-list').addEventListener('click', (e) => {
+  const inst = instrumentById(e.target.closest('[data-inst]')?.dataset.inst);
+  if (!inst) return;
+  useInstrument(inst);
+  // Came from the play screen: reopen the same song on the new instrument.
+  if (returnToSong) openSong(returnToSong);
+  else show('songs');
+  returnToSong = null;
+});
+
+let returnToSong = null;
+$('btn-instrument').addEventListener('click', () => {
+  returnToSong = game?.song ?? null;
+  stopGame();
+  show('instrument');
 });
 
 function renderSongs() {
+  $('songs-instrument').innerHTML = `${instrument.emoji} ${t(`inst.${instrument.id}`)} · <u>${t('inst.change')}</u>`;
   $('songs-hello').textContent = t('songs.hello', { name });
   $('not-you').textContent = t('songs.notYou', { name });
   $('song-list').innerHTML = SONGS.map((s) => {
@@ -94,6 +135,8 @@ $('song-list').addEventListener('click', (e) => {
   const id = e.target.closest('[data-song]')?.dataset.song;
   if (id) openSong(SONGS.find((s) => s.id === id));
 });
+
+$('songs-instrument').addEventListener('click', () => { returnToSong = null; show('instrument'); });
 
 $('not-you').addEventListener('click', () => {
   $('name-input').value = name ?? '';
@@ -139,7 +182,7 @@ let raf = 0;
 const buffer = new Float32Array(2048);
 
 function openSong(song) {
-  const savedBpm = storage.getTempo(song.id);
+  const savedBpm = storage.getTempo(song.id, instrument.id);
   game = {
     song,
     loop: null,
@@ -174,7 +217,7 @@ function resetRun() {
   game.items = run.items;
   game.lapNotes = run.lapNotes;
   game.total = run.lapNotes;
-  game.tracker = createTracker(game.items, { beatSeconds: bpmToBeat(game.bpm) });
+  game.tracker = createTracker(game.items, { beatSeconds: bpmToBeat(game.bpm), ...instrument.tracker });
   game.score = createScore();
   game.onsets = [];
   view.setSong(game.items);
@@ -300,8 +343,8 @@ function loop() {
     // Right after a click: keep the last reading so the click is never heard as a note.
     frame = { t: now, ...game.lastFrame };
   } else {
-    const pitch = detectPitch(buffer, ctx.sampleRate, { gate: game.gate });
-    const note = pitch ? freqToNote(pitch.freq).name : null;
+    const pitch = detectPitch(buffer, ctx.sampleRate, { gate: game.gate, ...instrument.pitch });
+    const note = pitch ? freqToNote(pitch.freq, instrument.nameShift).name : null;
     frame = { t: now, note, rms: level };
     game.lastFrame = { note, rms: level };
     if (DEBUG) debugInfo(pitch, note, level);
@@ -317,6 +360,8 @@ function loop() {
 
   const st = game.tracker.state();
   view.setHold(st.progress, st.phase === 'holding');
+  view.setHeard(frame.note);
+  view.tick(performance.now(), bpmToBeat(game.bpm));
   const info = metronome.running() ? metronome.beatInfo(now) : null;
   view.setBeat(info && info.since < 0.15 ? info.beatInBar : -1);
   if (now - game.lastSoundT > NO_SOUND_SECONDS) {
@@ -369,7 +414,7 @@ function calibrate(ev) {
   game.bpm = beatToBpm(beat);
   game.calibrating = false;
   game.tracker.setBeatSeconds(beat);
-  storage.setTempo(game.song.id, game.bpm);
+  storage.setTempo(game.song.id, game.bpm, instrument.id);
   metronome.start(game.bpm, game.song.timeSignature[0]);
   updateTempoPill();
 }
@@ -428,7 +473,7 @@ $('btn-mute').addEventListener('click', () => {
   updateTempoPill();
 });
 $('btn-retempo').addEventListener('click', () => {
-  storage.clearTempo(game.song.id);
+  storage.clearTempo(game.song.id, instrument.id);
   game.bpm = DEFAULT_BPM;
   game.calibrating = true;
   game.onsets = [];
@@ -466,7 +511,7 @@ function debugInfo(pitch, note, level) {
   const target = game.items[st.index]?.name;
   $('debug').textContent = [
     `Hz     ${pitch ? pitch.freq.toFixed(1) : '-'}`,
-    `note   ${note ?? '-'}   cents ${pitch ? freqToNote(pitch.freq).cents.toFixed(0) : '-'}`,
+    `note   ${note ?? '-'}   cents ${pitch ? freqToNote(pitch.freq, instrument.nameShift).cents.toFixed(0) : '-'}`,
     `rms    ${level.toFixed(3)}  gate ${game.gate.toFixed(3)}`,
     `target ${target}  phase ${st.phase}  hold ${(st.progress * 100).toFixed(0)}%`,
     `tempo  ${game.bpm ? Math.round(game.bpm) : '?'}  need ${game.tracker.required().toFixed(2)}s`,
@@ -495,7 +540,7 @@ if (DEBUG) {
     const note = DEBUG_KEYS[e.key];
     if (!note || !synth || e.repeat || heldKey) return;
     heldKey = e.key;
-    synth.play(NOTES[note].freq);
+    synth.play(NOTES[note].freq * instrument.synthShift);
   });
   window.addEventListener('keyup', (e) => {
     if (e.key !== heldKey) return;
@@ -507,4 +552,4 @@ if (DEBUG) {
 // ---------- boot ----------
 
 setLang(pickLang(storage.getLang(), navigator.language));
-show(name ? 'songs' : 'welcome');
+show(!name ? 'welcome' : instrument ? 'songs' : 'instrument');

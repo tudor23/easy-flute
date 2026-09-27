@@ -3,13 +3,23 @@ export default {
   name: 'EN',
   strings: {
     'app.title': 'Easy Flute',
-    'app.titleFor': "{name}'s recorder",
+    'app.titleFor.flute': "{name}'s flute",
+    'app.titleFor.piano': "{name}'s piano",
 
     'welcome.hello': 'Hello! 👋',
     'welcome.askName': "What's your name?",
     'welcome.placeholder': 'Your name',
     'welcome.go': "Let's go!",
     'welcome.nameMissing': 'Type your name 🙂',
+
+    'inst.pick': 'What will you play?',
+    'inst.flute': 'Flute',
+    'inst.fluteSub': 'the school flute',
+    'inst.piano': 'Piano',
+    'inst.pianoSub': 'a keyboard or piano',
+    'inst.change': 'change',
+    'piano.higher': 'I hear {heard}, but higher: find the marked {note} 👇',
+    'piano.lower': 'I hear {heard}, but lower: find the marked {note} 👇',
 
     'songs.hello': 'Hi, {name}!',
     'songs.pick': 'Pick a song',

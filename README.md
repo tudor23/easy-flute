@@ -1,6 +1,9 @@
 # Easy Flute 🎵
 
-A free browser game that helps children practise the **soprano recorder** (flauta dulce / flauta dolça). It listens through the microphone, shows how to finger each note, and moves the song along like a conveyor belt while the child plays the right note.
+A free browser game that helps children practise the **soprano recorder** (flauta dulce / flauta dolça) or a **piano / keyboard**. It listens through the microphone, shows how to play each note, and moves the song along while the child plays the right note:
+
+- **Recorder:** notes ride a conveyor belt, and each card shows which holes to cover.
+- **Piano:** notes fall onto a drawn keyboard, Synthesia-style, and wait until the right key is played.
 
 **Try it:** <https://tudor23.github.io/easy-flute/>
 
@@ -8,7 +11,7 @@ Nothing to install, and no account. Everything runs in the browser and no sound 
 
 ## How it works
 
-1. Type the player's name and pick a song.
+1. Type the player's name, choose **Flauta / Flute** or **Piano**, and pick a song.
 2. Tap **¡Empezar!** / **Start!** and allow the microphone.
 3. Each note is a card on a belt. The card in the middle (**¡AHORA!** / **NOW!**) shows the recorder with the holes to cover: filled = covered, ring = open, half = half covered, and the thumb hole on the side.
 4. Play the note and **hold it**. The belt moves while the right note sounds. Short notes (♪) need a short hold, long notes (♩) about twice as long.
@@ -21,7 +24,15 @@ Other things on the play screen:
 - **Bar numbers**: on the rhythm lane at the top, on the belt, and on the first card of each bar.
 - **Points**: +10 for a note right on the first try. Points are never taken away.
 
-### Testing without a recorder
+### Piano mode
+
+- Songs are played **one note at a time, in the written octave**: the plain names (DO…SI) are the octave starting at middle DO, which has a dot on the drawn keyboard.
+- The next note falls to the pink line and **waits**. Its key glows orange. Play it and the music flows on at the metronome tempo to the next note.
+- The key the app hears lights up green if it's right and blue if it's wrong. Playing the right note in another octave gets a "higher / lower" hint.
+- Use the keyboard's **piano** voice: it fades after each note, which is how the app tells two identical notes apart.
+- Tempo is remembered separately for recorder and piano.
+
+### Testing without an instrument
 
 Open <https://tudor23.github.io/easy-flute/?debug=1>. It shows what the microphone hears (Hz, note, cents), and adds a **"play it for me"** button: hold it, or hold the **space bar**, and the app acts as if the current note is being played correctly. The keys `a s r d f v g h j k` also play DO RE RE# MI FA FA# SOL LA SI DO' through the speakers.
 
@@ -144,14 +155,15 @@ Plain HTML, CSS and JavaScript modules, with no framework and no build step.
 
 | Folder | What's in it |
 | --- | --- |
-| [`js/music/`](js/music/) | Pitch detection (YIN), note names, the note and fingering table |
+| [`js/instruments/`](js/instruments/) | One small file per instrument (pitch range, octave, view) |
+| [`js/music/`](js/music/) | Pitch detection (YIN), note names, recorder fingerings, piano keyboard layout |
 | [`js/game/`](js/game/) | Following the song note by note, tempo, points, loops |
 | [`js/audio/`](js/audio/) | Microphone and metronome |
-| [`js/ui/`](js/ui/) | The recorder drawing, the curved belt, the play screen |
+| [`js/ui/`](js/ui/) | The recorder drawing, the curved belt, the piano roll, shared header and hints |
 | [`js/songs/`](js/songs/), [`js/i18n/`](js/i18n/) | Songs and languages |
 | [`tests/`](tests/) | Unit tests (`npm test`) |
 
-The full design is in [`docs/superpowers/specs/`](docs/superpowers/specs/2026-09-27-flute-trainer-design.md).
+The full design is in [`docs/superpowers/specs/`](docs/superpowers/specs/): [recorder](docs/superpowers/specs/2026-09-27-flute-trainer-design.md) and [piano](docs/superpowers/specs/2026-09-27-piano-mode-design.md).
 
 ## Contributing
 

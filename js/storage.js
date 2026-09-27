@@ -1,5 +1,8 @@
 const PREFIX = 'easyFlute.';
 
+// The flute keeps its original key so tempos saved before piano mode still work.
+const tempoKey = (songId, instrument) => (instrument === 'flute' ? `tempo.${songId}` : `tempo.${instrument}.${songId}`);
+
 function defaultBackend() {
   try {
     return globalThis.localStorage ?? null;
@@ -32,11 +35,13 @@ export function createStorage(backend = defaultBackend()) {
     setName: (name) => set('name', name),
     getLang: () => get('lang'),
     setLang: (code) => set('lang', code),
-    getTempo(songId) {
-      const bpm = Number(get(`tempo.${songId}`));
+    getInstrument: () => get('instrument'),
+    setInstrument: (id) => set('instrument', id),
+    getTempo(songId, instrument = 'flute') {
+      const bpm = Number(get(tempoKey(songId, instrument)));
       return Number.isFinite(bpm) && bpm > 0 ? bpm : null;
     },
-    setTempo: (songId, bpm) => set(`tempo.${songId}`, Math.round(bpm)),
-    clearTempo: (songId) => set(`tempo.${songId}`, null),
+    setTempo: (songId, bpm, instrument = 'flute') => set(tempoKey(songId, instrument), Math.round(bpm)),
+    clearTempo: (songId, instrument = 'flute') => set(tempoKey(songId, instrument), null),
   };
 }
