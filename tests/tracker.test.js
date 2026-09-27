@@ -145,3 +145,19 @@ test('a quarter note needs about twice the hold of an eighth', () => {
   p.play('MI', 0.2);
   assert.deepEqual(p.types(), ['start', 'complete']);
 });
+
+import PIANO from '../js/instruments/piano.js';
+
+test('piano: a note counts as soon as it is struck', () => {
+  const tr = createTracker([item('MI', 1), item('SI', 1)], { beatSeconds: 1, ...PIANO.tracker });
+  const p = player(tr).play('MI', 0.18);
+  assert.deepEqual(p.types(), ['start', 'complete']);
+});
+
+test('piano: SI SI needs two strikes (a fading note, then a new strike)', () => {
+  const tr = createTracker([item('SI'), item('SI'), item('LA')], { beatSeconds: 1, ...PIANO.tracker });
+  const p = player(tr).play('SI', 0.2, 0.3).play('SI', 0.3, 0.1).play('SI', 0.3, 0.05);
+  assert.deepEqual(p.types(), ['start', 'complete']);
+  p.play('SI', 0.2, 0.3);
+  assert.deepEqual(p.types(), ['start', 'complete', 'start', 'complete']);
+});

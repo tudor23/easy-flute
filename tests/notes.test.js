@@ -46,3 +46,22 @@ test('fingeringDiff from MI to RE# covers hole 6 half', () => {
 test('fingeringDiff reports the thumb', () => {
   assert.deepEqual(fingeringDiff(NOTES["RE'"].fingering, NOTES["DO'"].fingering), { cover: ['thumb'], lift: [], half: [] });
 });
+
+import { sameNoteOtherOctave } from '../js/music/noteName.js';
+
+test('piano naming: written pitch is sounding pitch (shift 2)', () => {
+  assert.equal(freqToNote(329.63, 2).name, 'MI');
+  assert.equal(freqToNote(261.63, 2).name, 'DO');
+  assert.equal(freqToNote(311.13, 2).name, 'RE#');
+  assert.equal(freqToNote(659.26, 2).name, "MI'");
+  assert.equal(freqToNote(164.81, 2).name, 'MI,');
+  assert.ok(Math.abs(freqToNote(329.63, 2).cents) < 1);
+});
+
+test('sameNoteOtherOctave says which way to go', () => {
+  assert.equal(sameNoteOtherOctave("MI'", 'MI'), 'up');
+  assert.equal(sameNoteOtherOctave('MI,', 'MI'), 'down');
+  assert.equal(sameNoteOtherOctave('MI', "MI'"), 'down');
+  assert.equal(sameNoteOtherOctave('RE', 'MI'), null);
+  assert.equal(sameNoteOtherOctave('MI', 'MI'), null);
+});

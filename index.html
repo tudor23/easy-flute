@@ -30,9 +30,17 @@
       </div>
     </section>
 
+    <section class="screen" id="screen-instrument" hidden>
+      <div class="panel center wide">
+        <h1 data-i18n="inst.pick"></h1>
+        <div class="instrument-list" id="instrument-list"></div>
+      </div>
+    </section>
+
     <section class="screen" id="screen-songs" hidden>
       <div class="panel center">
         <h1 id="songs-hello"></h1>
+        <button class="link instrument-link" id="songs-instrument"></button>
         <p class="lead" data-i18n="songs.pick"></p>
         <div class="song-list" id="song-list"></div>
         <button class="link" id="not-you"></button>
@@ -40,10 +48,13 @@
     </section>
 
     <section class="screen" id="screen-play" hidden>
-      <div class="stage">
+      <div class="stage" id="stage">
         <span class="spark s1">⭐</span><span class="spark s2">✨</span><span class="spark s4">🎶</span>
         <div class="play-head">
-          <button class="pill" id="btn-back" data-i18n="play.back"></button>
+          <div class="head-btns">
+            <button class="pill" id="btn-back" data-i18n="play.back"></button>
+            <button class="pill" id="btn-instrument"></button>
+          </div>
           <h1 class="song-title" id="play-title"></h1>
           <div class="head-btns">
             <button class="pill blue" id="btn-restart" data-i18n="play.restart"></button>
@@ -72,6 +83,7 @@
         </div>
         <div class="lane" id="lane"><div class="lane-strip" id="lane-strip"></div></div>
         <div class="hint" id="hint" aria-live="polite"></div>
+        <div class="roll" id="roll"><canvas id="roll-canvas"></canvas></div>
         <div class="belt" id="belt"><svg class="belt-bed" id="belt-bed" aria-hidden="true"></svg><div class="belt-strip" id="belt-strip"></div></div>
         <div class="legend" id="legend"></div>
         <button class="fake-btn" id="btn-fake" hidden data-i18n="play.fake"></button>

@@ -3,6 +3,9 @@ import { isRest } from '../game/song.js';
 import { NOTES, fingeringDiff } from '../music/notes.js';
 import { recorderSvg, holeIcon } from './fingering.js';
 import { createCurve } from './curve.js';
+import { createHud, esc, isLong, noteLabel } from './hud.js';
+
+export { noteLabel };
 
 const UNIT = 44;   // lane width of an eighth note, px
 const GAP = 4;
@@ -12,16 +15,7 @@ const MIN_UNIT = 96; // smallest short-note card on narrow screens, px
 const LIFT = 70;     // how far (px) the belt rises towards the horizon as it goes away
 const BAND = 22;     // belt thickness in front of the viewer, px
 
-const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const isLong = (item) => item.duration >= 1;
 const lenLabel = (item) => t(isLong(item) ? 'play.long' : 'play.short');
-
-// FA# -> FA♯, SIb -> SI♭, with the accidental styled so it stands out.
-export function noteLabel(name) {
-  return esc(name)
-    .replace('#', '<span class="acc">♯</span>')
-    .replace(/b(?=[',]*$)/, '<span class="acc">♭</span>');
-}
 
 // "Uncover hole 2" style tip for getting from the heard note to the target, or a
 // "look at the picture" nudge when too many holes differ.
@@ -56,7 +50,7 @@ export function createPlayView(root) {
   const strip = $('lane-strip');
   const belt = $('belt');
   const beltStrip = $('belt-strip');
-  const hint = $('hint');
+  const hud = createHud(root);
   let items = [];
   let playable = [];   // item indexes that are notes (not rests), in order
   let slots = [];
@@ -67,7 +61,6 @@ export function createPlayView(root) {
   let widths = [];
   let rights = [];
   let curve = null;
-  let popupTimer = null;
 
   const previous = (from) => {
     for (let i = from - 1; i >= 0; i--) if (!isRest(items[i])) return i;
@@ -228,29 +221,17 @@ export function createPlayView(root) {
       this.defaultHint();
     },
     defaultHint() {
-      const item = items[index];
-      if (!item) return;
       const prev = previous(index);
-      const repeat = prev >= 0 && items[prev].name === item.name;
-      hint.className = 'hint';
-      hint.innerHTML = `<div>${repeat
-        ? t('play.hintRepeat', { note: `<b>${noteLabel(item.name)}</b>` })
-        : t('play.hintPlay', { note: `<b>${noteLabel(item.name)}</b>`, len: t(isLong(item) ? 'play.lenLong' : 'play.lenShort') })}</div>`;
+      hud.defaultHint(items[index], prev >= 0 ? items[prev] : null);
     },
     wrongHint(heard) {
       const target = items[index].name;
-      hint.className = 'hint soft';
-      hint.innerHTML = `<div>${t('play.heard', { heard: `<span class="heard">${noteLabel(heard)}</span>`, note: `<b>${noteLabel(target)}</b>` })}</div>`
-        + `<div class="tip">${esc(fingeringTip(heard, target))}</div>`;
+      hud.wrongHint(heard, target, fingeringTip(heard, target));
     },
     earlyHint() {
-      hint.className = 'hint soft';
-      hint.innerHTML = `<div>${t('play.early', { note: `<b>${noteLabel(items[index].name)}</b>` })}</div>`;
+      hud.earlyHint(items[index].name);
     },
-    messageHint(text) {
-      hint.className = 'hint soft';
-      hint.innerHTML = `<div>${esc(text)}</div>`;
-    },
+    messageHint: hud.messageHint,
     setHold(progress, holding) {
       const slot = slots[pos];
       if (!slot) return;
@@ -263,36 +244,12 @@ export function createPlayView(root) {
       const text = t(holding ? 'play.hold' : 'play.listening');
       if (status.textContent !== text) status.textContent = text;
     },
-    setScore({ points, streak }, progress) {
-      $('points').textContent = points;
-      $('streak').textContent = streak;
-      $('progress').style.width = `${progress * 100}%`;
-    },
-    setLevel(level) {
-      $('lvl').style.width = `${Math.min(100, Math.round(level * 400))}%`;
-    },
-    setTempo({ bpm, listening, count = 0 }) {
-      const text = $('metro-text');
-      if (listening) {
-        text.innerHTML = `♩ = ${Math.round(bpm)} · ${t('play.tempoListening')} <span class="tdots">${[0, 1, 2]
-          .map((k) => `<b class="${k < count ? '' : 'o'}"></b>`).join('')}</span>`;
-      } else {
-        text.textContent = bpm ? `♩ = ${Math.round(bpm)}` : '';
-      }
-      $('metro').classList.toggle('listening', !!listening);
-    },
-    setBeat(beatInBar) {
-      $('dot1').classList.toggle('on', beatInBar === 0);
-      $('dot2').classList.toggle('on', beatInBar === 1);
-    },
-    popup(text) {
-      const el = $('popup');
-      el.textContent = text;
-      el.classList.remove('show');
-      void el.offsetWidth;
-      el.classList.add('show');
-      clearTimeout(popupTimer);
-      popupTimer = setTimeout(() => el.classList.remove('show'), 1400);
-    },
+    setScore: hud.setScore,
+    setLevel: hud.setLevel,
+    setTempo: hud.setTempo,
+    setBeat: hud.setBeat,
+    popup: hud.popup,
+    setHeard() {},
+    tick() {},
   };
 }

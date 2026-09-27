@@ -3,13 +3,23 @@ export default {
   name: 'ES',
   strings: {
     'app.title': 'Flauta fácil',
-    'app.titleFor': 'La flauta de {name}',
+    'app.titleFor.flute': 'La flauta de {name}',
+    'app.titleFor.piano': 'El piano de {name}',
 
     'welcome.hello': '¡Hola! 👋',
     'welcome.askName': '¿Cómo te llamas?',
     'welcome.placeholder': 'Tu nombre',
     'welcome.go': '¡Vamos!',
     'welcome.nameMissing': 'Escribe tu nombre 🙂',
+
+    'inst.pick': '¿Qué vas a tocar?',
+    'inst.flute': 'Flauta',
+    'inst.fluteSub': 'la flauta dulce del cole',
+    'inst.piano': 'Piano',
+    'inst.pianoSub': 'un teclado o piano',
+    'inst.change': 'cambiar',
+    'piano.higher': 'Te oigo {heard}, pero más agudo: busca el {note} marcado 👇',
+    'piano.lower': 'Te oigo {heard}, pero más grave: busca el {note} marcado 👇',
 
     'songs.hello': '¡Hola, {name}!',
     'songs.pick': 'Elige una canción',

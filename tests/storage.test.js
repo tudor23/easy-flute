@@ -45,3 +45,19 @@ test('no backend at all is fine', () => {
   s.setName('Vlad');
   assert.equal(s.getName(), null);
 });
+
+test('instrument is remembered, tempo is kept per instrument', () => {
+  const b = memoryBackend();
+  const s = createStorage(b);
+  assert.equal(s.getInstrument(), null);
+  s.setInstrument('piano');
+  s.setTempo('limu', 70);
+  s.setTempo('limu', 90, 'piano');
+  assert.equal(s.getInstrument(), 'piano');
+  assert.equal(s.getTempo('limu'), 70);
+  assert.equal(s.getTempo('limu', 'flute'), 70);
+  assert.equal(s.getTempo('limu', 'piano'), 90);
+  s.clearTempo('limu', 'piano');
+  assert.equal(s.getTempo('limu', 'piano'), null);
+  assert.equal(b.map.get('easyFlute.tempo.limu'), '70');
+});

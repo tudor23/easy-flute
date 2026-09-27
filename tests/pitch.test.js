@@ -65,3 +65,23 @@ test('rms of a full-scale sine is about 0.707', () => {
   const buf = new Float32Array(N).map((_, i) => Math.sin(2 * Math.PI * 1000 * i / SR));
   assert.ok(Math.abs(rms(buf) - Math.SQRT1_2) < 0.01);
 });
+
+import PIANO from '../js/instruments/piano.js';
+import { freqToNote } from '../js/music/noteName.js';
+
+test('piano-like tones C4-E5 are named in the right octave within 10 cents', () => {
+  const notes = { DO: 261.63, RE: 293.66, 'RE#': 311.13, MI: 329.63, FA: 349.23, 'FA#': 369.99, SOL: 392.0, LA: 440.0, SIb: 466.16, SI: 493.88, "DO'": 523.25, "RE'": 587.33, "MI'": 659.26 };
+  for (const [name, f] of Object.entries(notes)) {
+    // strong harmonics, fading like a struck string
+    const buf = new Float32Array(N);
+    for (let i = 0; i < N; i++) {
+      const decay = Math.exp(-i / (SR * 0.4));
+      buf[i] = 0.3 * decay * (Math.sin(2 * Math.PI * f * i / SR) + 0.7 * Math.sin(4 * Math.PI * f * i / SR + 1) + 0.5 * Math.sin(6 * Math.PI * f * i / SR + 2) + 0.3 * Math.sin(8 * Math.PI * f * i / SR));
+    }
+    const p = detectPitch(buf, SR, PIANO.pitch);
+    assert.ok(p, `${name} not detected`);
+    const n = freqToNote(p.freq, PIANO.nameShift);
+    assert.equal(n.name, name);
+    assert.ok(Math.abs(n.cents) < 10, `${name}: ${n.cents}`);
+  }
+});
