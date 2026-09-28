@@ -1,10 +1,15 @@
 // To add a language: copy es.js to <code>.js, translate the strings, and list it here.
 import es from './es.js';
 import en from './en.js';
+import ca from './ca.js';
 
-export const LANGUAGES = [es, en];
+// The first one is the base: its keys are the full set, and it fills any gaps.
+export const LANGUAGES = [es, en, ca];
 
 const byCode = Object.fromEntries(LANGUAGES.map((l) => [l.code, l]));
+
+// Order of the buttons at the top.
+export const MENU = ['en', 'es', 'ca'].map((code) => byCode[code]);
 let current = LANGUAGES[0];
 
 export function setLang(code) {

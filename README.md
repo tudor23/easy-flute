@@ -117,34 +117,33 @@ A note that isn't in the table yet (e.g. `DO#`) needs a line in [`js/music/notes
 
 ## Adding a language
 
-The app is in Spanish and English. Every piece of text lives in one file per language in [`js/i18n/`](js/i18n/).
+The app is in English, Spanish and Catalan. Every piece of text lives in one file per language in [`js/i18n/`](js/i18n/).
 
-1. Copy [`js/i18n/en.js`](js/i18n/en.js) to a new file named after the language code, e.g. `js/i18n/ca.js` for Catalan or `js/i18n/ro.js` for Romanian.
+1. Copy [`js/i18n/en.js`](js/i18n/en.js) to a new file named after the language code, e.g. `js/i18n/ro.js` for Romanian.
 2. Change the top:
 
    ```js
    export default {
-     code: 'ca',     // language code
-     name: 'CA',     // label on the language button
+     code: 'ro',     // language code
+     name: 'RO',     // label on the language button
      strings: {
-       'welcome.askName': 'Com et dius?',
+       'welcome.askName': 'Cum te cheamă?',
        // … translate every line
      },
    };
    ```
 
 3. Translate the text on the right of each line. Keep the keys on the left unchanged, and keep anything in `{curly braces}` (e.g. `{name}`, `{note}`) exactly as it is: the app fills those in.
-4. List it in [`js/i18n/index.js`](js/i18n/index.js):
+4. List it in [`js/i18n/index.js`](js/i18n/index.js), and add its code to `MENU` where its button should go:
 
    ```js
-   import es from './es.js';
-   import en from './en.js';
-   import ca from './ca.js';
+   import ro from './ro.js';
 
-   export const LANGUAGES = [es, en, ca];
+   export const LANGUAGES = [es, en, ca, ro];
+   export const MENU = ['en', 'es', 'ca', 'ro'].map((code) => byCode[code]);
    ```
 
-5. Optionally, add a `subtitle` in the new language to each song (`subtitle: { es: …, en: …, ca: … }`).
+5. Optionally, add a `subtitle` in the new language to each song (`subtitle: { es: …, en: …, ca: …, ro: … }`).
 6. Run `npm test`. The tests fail if the new file is missing a line that Spanish has, or if a `{placeholder}` changed.
 
 The app picks the language from the browser the first time. After that it remembers the one chosen with the buttons at the top.

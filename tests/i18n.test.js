@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { LANGUAGES, t, setLang, getLang, pickLang } from '../js/i18n/index.js';
+import { LANGUAGES, MENU, t, setLang, getLang, pickLang } from '../js/i18n/index.js';
 
 const [base] = LANGUAGES;
 
@@ -25,6 +25,17 @@ test('t() interpolates variables and follows setLang', () => {
   setLang('en');
   assert.equal(getLang(), 'en');
   assert.equal(t('songs.hello', { name: 'Vlad' }), 'Hi, Vlad!');
+  setLang('es');
+});
+
+test('language buttons read EN, ES, CA', () => {
+  assert.deepEqual(MENU.map((l) => l.name), ['EN', 'ES', 'CA']);
+});
+
+test('Catalan is available', () => {
+  setLang('ca');
+  assert.equal(t('songs.hello', { name: 'Vlad' }), 'Hola, Vlad!');
+  assert.equal(pickLang(null, 'ca-ES'), 'ca');
   setLang('es');
 });
 
