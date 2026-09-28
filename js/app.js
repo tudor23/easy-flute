@@ -1,4 +1,4 @@
-import { LANGUAGES, t, setLang, getLang, pickLang } from './i18n/index.js';
+import { MENU, t, setLang, getLang, pickLang } from './i18n/index.js';
 import { createStorage } from './storage.js';
 import { SONGS } from './songs/index.js';
 import { flattenSong, isRest, buildRun, clampLoop } from './game/song.js';
@@ -20,13 +20,14 @@ const LOOP_NOTES = 200; // a loop is laid out as enough laps for about this many
 const LOOP_LENGTHS = [1, 2, 3, 4, 5, 6];
 const QUIET_SECONDS = 0.5;
 const MIN_GATE = 0.01;
+const DEFAULT_NAME = 'Ander'; // used until someone types their own name
 
 const storage = createStorage();
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 let screen = 'welcome';
-let name = storage.getName();
+let name = storage.getName() || DEFAULT_NAME;
 const views = { belt: createPlayView($('screen-play')), roll: createRollView($('screen-play')) };
 let instrument = instrumentById(storage.getInstrument());
 let view = views.belt;
@@ -57,7 +58,7 @@ function applyStaticText() {
   if (instrument) $('btn-instrument').textContent = `${instrument.emoji} ${t(`inst.${instrument.id}`)} ⇄`;
   $('brand').textContent = name ? t(`app.titleFor.${instrument?.id ?? 'flute'}`, { name }) : t('app.title');
   document.title = t('app.title');
-  $('langs').innerHTML = LANGUAGES.map((l) => `<button data-lang="${l.code}" class="${l.code === getLang() ? 'on' : ''}">${l.name}</button>`).join('');
+  $('langs').innerHTML = MENU.map((l) => `<button data-lang="${l.code}" class="${l.code === getLang() ? 'on' : ''}">${l.name}</button>`).join('');
 }
 
 function refresh() {

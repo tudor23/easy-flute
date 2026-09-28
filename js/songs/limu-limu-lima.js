@@ -4,7 +4,7 @@
 export default {
   id: 'limu-limu-lima',
   title: 'Limu, Limu, Lima',
-  subtitle: { es: 'Canción tradicional sueca', en: 'Swedish traditional song' },
+  subtitle: { es: 'Canción tradicional sueca', en: 'Swedish traditional song', ca: 'Cançó tradicional sueca' },
   timeSignature: [2, 4],
   video: 'https://www.youtube.com/watch?v=3w3x3lRLuIY&t=8s',
   measures: [
