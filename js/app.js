@@ -6,7 +6,7 @@ import { createTracker } from './game/tracker.js';
 import { createScore, scoreNote } from './game/score.js';
 import { estimateBeatSeconds, beatToBpm, bpmToBeat, CALIBRATION_NOTES, DEFAULT_BPM } from './game/tempo.js';
 import { detectPitch, rms } from './music/pitch.js';
-import { freqToNote, nameWithSlack } from './music/noteName.js';
+import { freqToNote, nameWithSlack, acceptOctave } from './music/noteName.js';
 import { NOTES } from './music/notes.js';
 import { createAudioContext, createAnalyser, openMic, createDebugSynth } from './audio/mic.js';
 import { createMetronome } from './audio/metronome.js';
@@ -31,6 +31,16 @@ let name = storage.getName() || DEFAULT_NAME;
 const views = { belt: createPlayView($('screen-play')), roll: createRollView($('screen-play')) };
 let instrument = instrumentById(storage.getInstrument());
 let view = views.belt;
+let exam = storage.getExam();
+
+// Exam only exists on the flute: the piano roll has no staff to read the notes from.
+function applyExam() {
+  const on = exam && view === views.belt;
+  views.belt.setExam(on);
+  $('btn-exam').hidden = view !== views.belt;
+  $('btn-exam').classList.toggle('on', on);
+  $('btn-exam').setAttribute('aria-pressed', String(on));
+}
 
 function useInstrument(inst) {
   instrument = inst;
@@ -39,6 +49,7 @@ function useInstrument(inst) {
   $('stage').classList.toggle('piano', inst.view === 'roll');
   $('btn-instrument').textContent = `${inst.emoji} ${t(`inst.${inst.id}`)} ⇄`;
   applyStaticText();
+  applyExam();
 }
 if (instrument) useInstrument(instrument);
 
@@ -67,7 +78,7 @@ function refresh() {
   if (screen === 'instrument') renderInstruments();
   if (screen === 'play' && game) {
     renderLoopBar();
-    view.setSong(game.items);
+    view.setSong(game.items, { keySignature: game.song.keySignature });
     view.showIndex(game.tracker.state().index);
     updateTempoPill();
   }
@@ -221,7 +232,7 @@ function resetRun() {
   game.tracker = createTracker(game.items, { beatSeconds: bpmToBeat(game.bpm), ...instrument.tracker });
   game.score = createScore();
   game.onsets = [];
-  view.setSong(game.items);
+  view.setSong(game.items, { keySignature: game.song.keySignature });
   view.showIndex(game.tracker.state().index);
   view.setScore(game.score, 0);
   updateTempoPill();
@@ -346,7 +357,8 @@ function loop() {
   } else {
     const pitch = detectPitch(buffer, ctx.sampleRate, { gate: game.gate, ...instrument.pitch });
     const target = game.items[game.tracker.state().index]?.name;
-    const note = pitch ? nameWithSlack(pitch.freq, instrument.nameShift, target, instrument.slack) : null;
+    let note = pitch ? nameWithSlack(pitch.freq, instrument.nameShift, target, instrument.slack) : null;
+    if (instrument.octaveSlack) note = acceptOctave(note, target, instrument.octaveSlack);
     frame = { t: now, note, rms: level };
     game.lastFrame = { note, rms: level };
     if (DEBUG) debugInfo(pitch, note, level);
@@ -459,6 +471,13 @@ $('btn-start').addEventListener('click', startPlaying);
 $('btn-pause').addEventListener('click', pause);
 $('btn-resume').addEventListener('click', resume);
 $('btn-restart').addEventListener('click', restartRun);
+
+$('btn-exam').addEventListener('click', () => {
+  exam = !exam;
+  storage.setExam(exam);
+  applyExam();
+  if (game) view.defaultHint();
+});
 
 // Enter: start, or go back to the top of the loop (or the song).
 window.addEventListener('keydown', (e) => {

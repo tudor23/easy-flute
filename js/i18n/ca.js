@@ -62,6 +62,11 @@ export default {
     'play.fake': "🤫 Toca per mi (mantén premut o barra d'espai)",
     'play.legendHalf': 'mig',
     'play.guide': '🎼 Les posicions',
+    'exam.button': '🎓 Examen',
+    'exam.hintPlay': 'Llegeix la nota i toca-la! ({len})',
+    'exam.hintRepeat': 'Respira i un altre cop!',
+    'exam.heard': 'Et sento {heard}. Mira un altre cop el pentagrama 👀',
+    'exam.early': 'Gairebé! Aguanta-la una mica més',
 
     'tip.cover': 'Tapa {what}',
     'tip.lift': 'Destapa {what}',

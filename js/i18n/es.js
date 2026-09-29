@@ -62,6 +62,11 @@ export default {
     'play.fake': '🤫 Tocar por mí (mantén pulsado o barra espaciadora)',
     'play.legendHalf': 'medio',
     'play.guide': '🎼 Las posiciones',
+    'exam.button': '🎓 Examen',
+    'exam.hintPlay': '¡Lee la nota y tócala! ({len})',
+    'exam.hintRepeat': '¡Respira y otra vez!',
+    'exam.heard': 'Te oigo {heard}. Mira otra vez el pentagrama 👀',
+    'exam.early': '¡Casi! Mantenla un poquito más',
 
     'tip.cover': 'Tapa {what}',
     'tip.lift': 'Destapa {what}',

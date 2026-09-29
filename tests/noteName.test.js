@@ -1,8 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { freqToNote, nameWithSlack } from '../js/music/noteName.js';
+import { freqToNote, nameWithSlack, acceptOctave } from '../js/music/noteName.js';
 import { NOTES } from '../js/music/notes.js';
 import flute from '../js/instruments/flute.js';
+import piano from '../js/instruments/piano.js';
 
 const off = (freq, cents) => freq * 2 ** (cents / 1200);
 const RE_SHARP = NOTES['RE#'].freq;
@@ -26,4 +27,12 @@ test('beyond the slack, or with another target, notes are named as usual', () =>
 
 test('slack works on the piano naming too (shift 2)', () => {
   assert.equal(nameWithSlack(off(RE_SHARP / 2, -70), 2, 'RE#', { 'RE#': 75 }), 'RE#');
+});
+
+test('the piano accepts the right note one octave off', () => {
+  assert.equal(acceptOctave("MI'", 'MI', piano.octaveSlack), 'MI');
+  assert.equal(acceptOctave('MI,', 'MI', piano.octaveSlack), 'MI');
+  assert.equal(acceptOctave("MI''", 'MI', piano.octaveSlack), "MI''");
+  assert.equal(acceptOctave("FA'", 'MI', piano.octaveSlack), "FA'");
+  assert.equal(acceptOctave(null, 'MI', piano.octaveSlack), null);
 });

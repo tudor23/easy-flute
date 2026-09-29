@@ -35,6 +35,8 @@ export function createStorage(backend = defaultBackend()) {
     setName: (name) => set('name', name),
     getLang: () => get('lang'),
     setLang: (code) => set('lang', code),
+    getExam: () => get('exam') === '1',
+    setExam: (on) => set('exam', on ? '1' : null),
     getInstrument: () => get('instrument'),
     setInstrument: (id) => set('instrument', id),
     getTempo(songId, instrument = 'flute') {
