@@ -6,7 +6,7 @@ import { createTracker } from './game/tracker.js';
 import { createScore, scoreNote } from './game/score.js';
 import { estimateBeatSeconds, beatToBpm, bpmToBeat, CALIBRATION_NOTES, DEFAULT_BPM } from './game/tempo.js';
 import { detectPitch, rms } from './music/pitch.js';
-import { freqToNote } from './music/noteName.js';
+import { freqToNote, nameWithSlack } from './music/noteName.js';
 import { NOTES } from './music/notes.js';
 import { createAudioContext, createAnalyser, openMic, createDebugSynth } from './audio/mic.js';
 import { createMetronome } from './audio/metronome.js';
@@ -345,7 +345,8 @@ function loop() {
     frame = { t: now, ...game.lastFrame };
   } else {
     const pitch = detectPitch(buffer, ctx.sampleRate, { gate: game.gate, ...instrument.pitch });
-    const note = pitch ? freqToNote(pitch.freq, instrument.nameShift).name : null;
+    const target = game.items[game.tracker.state().index]?.name;
+    const note = pitch ? nameWithSlack(pitch.freq, instrument.nameShift, target, instrument.slack) : null;
     frame = { t: now, note, rms: level };
     game.lastFrame = { note, rms: level };
     if (DEBUG) debugInfo(pitch, note, level);

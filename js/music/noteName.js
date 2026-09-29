@@ -23,6 +23,19 @@ export function freqToNote(freq, shift = 1) {
 const octaveOf = (name) => (name.match(/'/g) || []).length - (name.match(/,/g) || []).length;
 const baseOf = (name) => name.replace(/[',]/g, '');
 
+// Like freqToNote().name, but a note that's hard to hit in tune (e.g. the half-holed RE#
+// on the recorder) still counts as the target when it's within slack[target] cents of it,
+// instead of the usual 50.
+export function nameWithSlack(freq, shift, target, slack = {}) {
+  const heard = freqToNote(freq, shift).name;
+  const allowed = target && slack[target];
+  const pc = allowed ? PITCH_CLASSES.indexOf(baseOf(target)) : -1;
+  if (pc < 0) return heard;
+  const targetMidi = 12 * (6 + octaveOf(target)) + pc;
+  const exact = 69 + 12 * Math.log2((freq * shift) / 440);
+  return Math.abs(exact - targetMidi) * 100 <= allowed ? target : heard;
+}
+
 // Same note, different octave: 'up' if heard is higher than target, 'down' if lower.
 export function sameNoteOtherOctave(heard, target) {
   if (!heard || !target || baseOf(heard) !== baseOf(target)) return null;
