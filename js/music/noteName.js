@@ -23,6 +23,13 @@ export function freqToNote(freq, shift = 1) {
 const octaveOf = (name) => (name.match(/'/g) || []).length - (name.match(/,/g) || []).length;
 const baseOf = (name) => name.replace(/[',]/g, '');
 
+// The target, if `heard` is the same note up to `octaves` octaves away (e.g. a piano whose
+// low MI is picked up an octave high through its overtones); otherwise `heard` unchanged.
+export function acceptOctave(heard, target, octaves = 1) {
+  if (!heard || !target || baseOf(heard) !== baseOf(target)) return heard;
+  return Math.abs(octaveOf(heard) - octaveOf(target)) <= octaves ? target : heard;
+}
+
 // Like freqToNote().name, but a note that's hard to hit in tune (e.g. the half-holed RE#
 // on the recorder) still counts as the target when it's within slack[target] cents of it,
 // instead of the usual 50.

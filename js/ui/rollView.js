@@ -212,6 +212,7 @@ export function createRollView(root) {
       hud.earlyHint(items[index].name);
     },
     messageHint: hud.messageHint,
+    setExam() {}, // exam mode is flute-only: the piano roll has no staff to read from
     setScore: hud.setScore,
     setLevel: hud.setLevel,
     setTempo: hud.setTempo,

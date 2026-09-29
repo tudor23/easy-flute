@@ -62,6 +62,11 @@ export default {
     'play.fake': '🤫 Play it for me (hold, or press space)',
     'play.legendHalf': 'half',
     'play.guide': '🎼 How to play each note',
+    'exam.button': '🎓 Exam',
+    'exam.hintPlay': 'Read the note and play it! ({len})',
+    'exam.hintRepeat': 'Breathe and play it again!',
+    'exam.heard': 'I hear {heard}. Look at the staff again 👀',
+    'exam.early': 'Almost! Hold it a little longer',
 
     'tip.cover': 'Cover {what}',
     'tip.lift': 'Uncover {what}',

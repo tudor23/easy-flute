@@ -3,6 +3,7 @@ import { isRest } from '../game/song.js';
 import { NOTES, fingeringDiff } from '../music/notes.js';
 import { recorderSvg, holeIcon } from './fingering.js';
 import { createCurve } from './curve.js';
+import { staffSvg, restSvg, clefSvg } from './staff.js';
 import { createHud, esc, isLong, noteLabel } from './hud.js';
 
 export { noteLabel };
@@ -52,6 +53,7 @@ export function createPlayView(root) {
   const beltStrip = $('belt-strip');
   const hud = createHud(root);
   let items = [];
+  let keySignature = [];
   let playable = [];   // item indexes that are notes (not rests), in order
   let slots = [];
   let index = 0;
@@ -79,6 +81,7 @@ export function createPlayView(root) {
       return `<div class="slot ${barClass}" style="--units:${item.duration * 2}"><div class="card"><div class="tag"></div>`
         + (barStart ? `<span class="bar-badge">${bar}</span>` : '')
         + `<div class="note">${noteLabel(item.name)}</div>`
+        + `<div class="card-staff">${staffSvg(item.name, item.duration, { keySignature, width: 56 })}</div>`
         + `${recorderSvg(item.name, { thumbLabel: t('play.thumb') })}`
         + `<div class="beats"><span class="beat ${isLong(item) ? 'q' : 'e'}"></span><span class="beat-lbl">${lenLabel(item)}</span></div>`
         + '<div class="hold"><i></i></div><div class="status"></div></div>'
@@ -177,7 +180,7 @@ export function createPlayView(root) {
   }
 
   function renderLane() {
-    let html = '';
+    let html = `<span class="clef">${clefSvg(keySignature)}</span>`;
     items.forEach((item, i) => {
       const prev = items[i - 1];
       if (!prev || item.measure !== prev.measure || item.lap !== prev.lap) {
@@ -185,7 +188,9 @@ export function createPlayView(root) {
       }
       const units = item.duration * 2;
       const width = units * UNIT + (units - 1) * GAP;
-      html += `<span class="blk ${isRest(item) ? 'rest' : ''}" data-i="${i}" style="width:${width}px">${isRest(item) ? '' : noteLabel(item.name)}</span>`;
+      const staff = isRest(item) ? restSvg(width) : staffSvg(item.name, item.duration, { keySignature, width });
+      html += `<span class="blk ${isRest(item) ? 'rest' : ''}" data-i="${i}" style="width:${width}px">${staff}`
+        + `<span class="nm">${isRest(item) ? '' : noteLabel(item.name)}</span></span>`;
     });
     strip.innerHTML = html;
   }
@@ -217,8 +222,9 @@ export function createPlayView(root) {
   });
 
   return {
-    setSong(songItems) {
+    setSong(songItems, { keySignature: key = [] } = {}) {
       items = songItems;
+      keySignature = key;
       playable = items.map((item, i) => (isRest(item) ? -1 : i)).filter((i) => i >= 0);
       renderLane();
       renderBelt();
@@ -241,12 +247,17 @@ export function createPlayView(root) {
     },
     wrongHint(heard) {
       const target = items[index].name;
-      hud.wrongHint(heard, target, fingeringTip(heard, target));
+      hud.wrongHint(heard, target, hud.isExam() ? '' : fingeringTip(heard, target));
     },
     earlyHint() {
       hud.earlyHint(items[index].name);
     },
     messageHint: hud.messageHint,
+    // Exam: only the note on the staff is shown; names, drawings and fingering tips are hidden.
+    setExam(on) {
+      root.querySelector('.stage').classList.toggle('exam', on);
+      hud.setExam(on);
+    },
     setHold(progress, holding) {
       const slot = slots[pos];
       if (!slot) return;

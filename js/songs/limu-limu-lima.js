@@ -6,6 +6,7 @@ export default {
   title: 'Limu, Limu, Lima',
   subtitle: { es: 'Canción tradicional sueca', en: 'Swedish traditional song', ca: 'Cançó tradicional sueca' },
   timeSignature: [2, 4],
+  keySignature: ['FA#'], // one sharp: FA is always FA# and the sheet shows no ♯ next to it
   video: 'https://www.youtube.com/watch?v=3w3x3lRLuIY&t=8s',
   measures: [
     [['MI', 0.5], ['SI', 0.5], ['SI', 0.5], ['LA', 0.5]],

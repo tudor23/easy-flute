@@ -16,6 +16,7 @@ export function createHud(root) {
   const $ = (id) => root.querySelector(`#${id}`);
   const hint = $('hint');
   let popupTimer = null;
+  let exam = false;
 
   const setHint = (html, soft) => {
     hint.className = soft ? 'hint soft' : 'hint';
@@ -23,14 +24,25 @@ export function createHud(root) {
   };
 
   return {
+    setExam(on) { exam = on; },
+    isExam: () => exam,
     defaultHint(item, previousItem) {
       if (!item) return;
+      const len = t(isLong(item) ? 'play.lenLong' : 'play.lenShort');
+      if (exam) {
+        setHint(`<div>${t(previousItem?.name === item.name ? 'exam.hintRepeat' : 'exam.hintPlay', { len })}</div>`);
+        return;
+      }
       const note = `<b>${noteLabel(item.name)}</b>`;
       setHint(`<div>${previousItem?.name === item.name
         ? t('play.hintRepeat', { note })
-        : t('play.hintPlay', { note, len: t(isLong(item) ? 'play.lenLong' : 'play.lenShort') })}</div>`);
+        : t('play.hintPlay', { note, len })}</div>`);
     },
     wrongHint(heard, target, tip = '') {
+      if (exam) {
+        setHint(`<div>${t('exam.heard', { heard: `<span class="heard">${noteLabel(heard)}</span>` })}</div>`, true);
+        return;
+      }
       setHint(`<div>${t('play.heard', { heard: `<span class="heard">${noteLabel(heard)}</span>`, note: `<b>${noteLabel(target)}</b>` })}</div>`
         + (tip ? `<div class="tip">${esc(tip)}</div>` : ''), true);
     },
@@ -38,6 +50,10 @@ export function createHud(root) {
       setHint(`<div>${t(direction === 'up' ? 'piano.higher' : 'piano.lower', { heard: `<span class="heard">${noteLabel(heard)}</span>`, note: `<b>${noteLabel(target)}</b>` })}</div>`, true);
     },
     earlyHint(name) {
+      if (exam) {
+        setHint(`<div>${t('exam.early')}</div>`, true);
+        return;
+      }
       setHint(`<div>${t('play.early', { note: `<b>${noteLabel(name)}</b>` })}</div>`, true);
     },
     messageHint(text) {

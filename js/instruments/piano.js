@@ -6,6 +6,8 @@ export default {
   view: 'roll',
   pitch: { minFreq: 120, maxFreq: 1100 },
   nameShift: 2,
+  // the right note one octave up or down still counts (MI is often heard an octave high)
+  octaveSlack: 1,
   tracker: { holdFraction: 0, minHold: 0.08 },
   synthShift: 0.5,
 };

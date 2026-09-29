@@ -219,19 +219,30 @@ input {
 .stage:not(.piano) .roll, .stage.piano .lane, .stage.piano .belt, .stage.piano .legend, .stage.piano .guide { display: none; }
 .stage.piano .roll { margin-bottom: 18px; }
 
+/* exam: read the note from the staff only; no names, no recorder drawings, no fingering guide */
+.stage.exam .card .note, .stage.exam .card .recorder, .stage.exam .guide, .stage.exam .legend { display: none; }
+.stage.exam .blk .nm { visibility: hidden; }
+.stage.exam .card .card-staff svg { width: min(130px, 100%); margin-top: 8px; }
+.stage.exam .belt { margin-bottom: 18px; }
+.exam-btn.on { background: linear-gradient(180deg, #a86bff, var(--purple)); border-color: #e2ccff; box-shadow: 0 4px 0 #07122f, 0 0 16px #a86bffaa; }
+
 /* rhythm lane */
 .lane {
-  position: relative; max-width: 720px; margin: 0 auto 14px; height: 50px; overflow: hidden;
+  position: relative; max-width: 720px; margin: 0 auto 14px; height: 104px; overflow: hidden;
   background: #ffffff14; border: 3px solid #4cc3e699; border-radius: 16px; padding: 6px;
 }
 .lane-strip { display: flex; gap: 4px; height: 100%; transition: transform .35s ease; }
 .blk {
-  position: relative; overflow: hidden; flex: none; display: flex; align-items: center; justify-content: center;
-  border: 2px solid #9cc3ff; border-radius: 10px; background: #2b4a8f; color: #fff; font-weight: 800; font-size: 13px;
+  position: relative; overflow: hidden; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+  border: 2px solid #9cc3ff; border-radius: 10px; background: #fff8e1; color: var(--ink); font-weight: 800; font-size: 13px;
 }
-.blk.rest { background: repeating-linear-gradient(45deg, transparent, transparent 5px, #ffffff1a 5px, #ffffff1a 10px); border-style: dashed; }
-.blk.done { background: #3fae4a; border-color: #9df27a; opacity: .7; }
-.blk.now { background: var(--yellow); color: var(--ink); border-color: #fff; box-shadow: 0 0 0 3px var(--orange), 0 0 16px var(--orange); }
+/* each block is a bit of the song sheet: the note on its staff, its name underneath */
+.blk .staff, .clef .staff { display: block; flex: none; height: 64px; margin-top: 4px; }
+.blk .nm { line-height: 1; padding-top: 2px; }
+.clef { flex: none; display: flex; align-items: flex-start; background: #fff8e1; border: 2px solid #9cc3ff; border-radius: 10px; margin-right: 2px; }
+.blk.rest { border-style: dashed; }
+.blk.done { background: #c9f5c0; border-color: #9df27a; opacity: .75; }
+.blk.now { background: var(--yellow); border-color: #fff; box-shadow: 0 0 0 3px var(--orange), 0 0 16px var(--orange); }
 .blk.now::after { content: ''; position: absolute; inset: 0 auto 0 0; width: var(--p, 0%); background: #ff9f1c77; }
 .bar { position: relative; width: 3px; flex: none; background: #cfefff; border-radius: 2px; margin: 0 2px; }
 .bar b { position: absolute; top: -5px; left: 5px; font-size: 10px; line-height: 1; color: #fff; opacity: .7; }
@@ -287,6 +298,8 @@ input {
 }
 .card .tag:empty { display: none; }
 .card .note { font-weight: 800; line-height: 1; font-size: 46px; color: #fff; -webkit-text-stroke: 5px #0b1a45; paint-order: stroke fill; text-shadow: 0 3px 0 #0b1a45; transition: color .4s; }
+/* the note as it looks on the song sheet */
+.card .card-staff svg { display: block; margin: 4px auto 0; width: min(90px, 100%); height: auto; background: #fff8e1; border-radius: 14px; border: 2px solid #0b1a4533; }
 /* each recorder sits on a little cream sticker so every hole shows on the dark bubbles */
 .card .recorder { display: block; margin: 4px auto 0; width: min(82px, 100%); height: auto; background: #fff8e1; border-radius: 16px; border: 2px solid #0b1a4533; }
 .slot.next .card { background: radial-gradient(circle at 50% 25%, #ffc98f, #f07a3a 85%); border-color: #ffd9b0; box-shadow: 0 0 22px #ff9f1c77; }
