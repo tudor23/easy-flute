@@ -108,6 +108,12 @@ input {
 }
 .song-card:hover, .pick:hover { transform: translateY(-2px); }
 .stat { font-size: 30px; font-weight: 800; margin: 8px 0; }
+.stars { display: flex; justify-content: center; gap: 6px; margin: 6px 0 2px; font-size: 56px; line-height: 1; }
+.stars span { color: #d9d3c0; -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; }
+.stars span.on { color: var(--yellow); text-shadow: 0 0 18px #ffb300; animation: star-pop .5s ease-out backwards; }
+.stars span.on:nth-child(2) { animation-delay: .25s; }
+.stars span.on:nth-child(3) { animation-delay: .5s; }
+@keyframes star-pop { from { transform: scale(0) rotate(-40deg); } 70% { transform: scale(1.3); } to { transform: scale(1); } }
 
 /* ---------- instrument picker ---------- */
 .panel.wide { max-width: 640px; }
@@ -178,11 +184,11 @@ input {
 .lvl { width: 64px; height: 10px; background: #ffffff30; border-radius: 5px; overflow: hidden; display: inline-block; }
 .lvl i { display: block; height: 100%; width: 0; background: #7ee081; transition: width .08s; }
 .plus {
-  position: absolute; right: -6px; top: -18px; font-size: 20px; color: #7ee081; text-shadow: 0 2px 0 #0008;
+  position: absolute; left: 50%; top: -18px; font-size: 20px; color: #7ee081; text-shadow: 0 2px 0 #0008; white-space: nowrap;
   opacity: 0; pointer-events: none;
 }
-.plus.show { animation: plus 0.9s ease-out; }
-@keyframes plus { 0% { opacity: 1; transform: translateY(6px); } 100% { opacity: 0; transform: translateY(-14px); } }
+.plus.show { animation: plus 1.6s ease-out; }
+@keyframes plus { 0% { opacity: 1; transform: translate(-50%, 6px); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -22px); } }
 
 .metro { width: 470px; max-width: 100%; justify-content: center; white-space: nowrap; }
 .metro .dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #cfefff; background: transparent; display: inline-block; }
@@ -229,23 +235,25 @@ input {
 /* rhythm lane */
 .lane {
   position: relative; max-width: 720px; margin: 0 auto 14px; height: 104px; overflow: hidden;
-  background: #ffffff14; border: 3px solid #4cc3e699; border-radius: 16px; padding: 6px;
+  background: #fff8e1; border: 3px solid #4cc3e699; border-radius: 16px; padding: 6px;
 }
-.lane-strip { display: flex; gap: 4px; height: 100%; transition: transform .35s ease; }
+.lane-strip { position: relative; display: flex; gap: 4px; height: 100%; transition: transform .35s ease; }
+/* one staff over the whole strip, like a line of the song sheet */
+.lane-strip .sheet { position: absolute; left: 0; top: 4px; pointer-events: none; }
 .blk {
   position: relative; overflow: hidden; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-  border: 2px solid #9cc3ff; border-radius: 10px; background: #fff8e1; color: var(--ink); font-weight: 800; font-size: 13px;
+  border: 2px solid transparent; border-radius: 10px; background: transparent; color: var(--ink); font-weight: 800; font-size: 13px;
+  justify-content: flex-end; padding-bottom: 3px;
 }
 /* each block is a bit of the song sheet: the note on its staff, its name underneath */
-.blk .staff, .clef .staff { display: block; flex: none; height: 64px; margin-top: 4px; }
-.blk .nm { line-height: 1; padding-top: 2px; }
-.clef { flex: none; display: flex; align-items: flex-start; background: #fff8e1; border: 2px solid #9cc3ff; border-radius: 10px; margin-right: 2px; }
-.blk.rest { border-style: dashed; }
-.blk.done { background: #c9f5c0; border-color: #9df27a; opacity: .75; }
-.blk.now { background: var(--yellow); border-color: #fff; box-shadow: 0 0 0 3px var(--orange), 0 0 16px var(--orange); }
+.blk .nm { line-height: 1; }
+.clef { flex: none; }
+.blk.done { background: #c9f5c0; }
+.blk.now { background: var(--yellow); border-color: var(--orange); box-shadow: 0 0 12px var(--orange); }
 .blk.now::after { content: ''; position: absolute; inset: 0 auto 0 0; width: var(--p, 0%); background: #ff9f1c77; }
-.bar { position: relative; width: 3px; flex: none; background: #cfefff; border-radius: 2px; margin: 0 2px; }
-.bar b { position: absolute; top: -5px; left: 5px; font-size: 10px; line-height: 1; color: #fff; opacity: .7; }
+/* bar lines span the staff, from the top line (y 16) to the bottom one (y 48) */
+.bar { position: relative; align-self: flex-start; width: 1.5px; height: 32px; margin: 20px 2px 0; flex: none; background: var(--ink); }
+.bar b { position: absolute; top: -18px; left: -3px; font-size: 10px; line-height: 1; color: var(--ink); opacity: .7; }
 .bar.first { background: transparent; }
 
 /* note belt: every note is a card on one strip that slides left */

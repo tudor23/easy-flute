@@ -85,7 +85,9 @@ export default {
     'done.title': 'Well done, {name}! 🎉',
     'done.played': 'You played {song}',
     'done.points': '{points} points',
-    'done.firstTry': '{n} of {total} notes on the first try',
+    'done.perfect': '{n} of {total} notes perfect',
+    'score.short': 'a bit short',
+    'score.long': 'a bit long',
     'done.again': '↺ Again',
     'done.songs': 'Songs',
 

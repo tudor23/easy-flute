@@ -3,7 +3,7 @@ import { isRest } from '../game/song.js';
 import { NOTES, fingeringDiff } from '../music/notes.js';
 import { recorderSvg, holeIcon } from './fingering.js';
 import { createCurve } from './curve.js';
-import { staffSvg, restSvg, clefSvg } from './staff.js';
+import { staffSvg, sheetSvg, clefWidth } from './staff.js';
 import { createHud, esc, isLong, noteLabel } from './hud.js';
 
 export { noteLabel };
@@ -179,8 +179,22 @@ export function createPlayView(root) {
     $('guide-list').querySelectorAll('.gnote').forEach((el) => el.classList.toggle('on', el.dataset.note === name));
   }
 
+  // The lane reads like a line of the song sheet: blocks (for colours and names) with one
+  // staff drawn over all of them, so eighths in the same beat can share a beam.
+  let sheetDrawn = false;
+  function drawSheet() {
+    const blocks = [...strip.querySelectorAll('.blk')];
+    if (!blocks.length || !strip.offsetWidth) return; // not on screen yet: draw when it is
+    const xs = [];
+    blocks.forEach((el) => { xs[Number(el.dataset.i)] = el.offsetLeft + el.offsetWidth / 2; });
+    strip.querySelector('.sheet')?.remove();
+    strip.insertAdjacentHTML('beforeend', sheetSvg(items, xs, { width: strip.scrollWidth, keySignature }));
+    sheetDrawn = true;
+  }
+
   function renderLane() {
-    let html = `<span class="clef">${clefSvg(keySignature)}</span>`;
+    sheetDrawn = false;
+    let html = `<span class="clef" style="width:${clefWidth(keySignature)}px"></span>`;
     items.forEach((item, i) => {
       const prev = items[i - 1];
       if (!prev || item.measure !== prev.measure || item.lap !== prev.lap) {
@@ -188,14 +202,15 @@ export function createPlayView(root) {
       }
       const units = item.duration * 2;
       const width = units * UNIT + (units - 1) * GAP;
-      const staff = isRest(item) ? restSvg(width) : staffSvg(item.name, item.duration, { keySignature, width });
-      html += `<span class="blk ${isRest(item) ? 'rest' : ''}" data-i="${i}" style="width:${width}px">${staff}`
+      html += `<span class="blk ${isRest(item) ? 'rest' : ''}" data-i="${i}" style="width:${width}px">`
         + `<span class="nm">${isRest(item) ? '' : noteLabel(item.name)}</span></span>`;
     });
     strip.innerHTML = html;
+    drawSheet();
   }
 
   function updateLane() {
+    if (!sheetDrawn) drawSheet();
     strip.querySelectorAll('.blk').forEach((el) => {
       const i = Number(el.dataset.i);
       el.classList.toggle('done', i < index);

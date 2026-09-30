@@ -85,7 +85,9 @@ export default {
     'done.title': '¡Muy bien, {name}! 🎉',
     'done.played': 'Has tocado {song}',
     'done.points': '{points} puntos',
-    'done.firstTry': '{n} de {total} notas a la primera',
+    'done.perfect': '{n} de {total} notas perfectas',
+    'score.short': 'un poco corta',
+    'score.long': 'un poco larga',
     'done.again': '↺ Otra vez',
     'done.songs': 'Canciones',
 
