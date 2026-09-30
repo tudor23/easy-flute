@@ -3,7 +3,7 @@ import { createStorage } from './storage.js';
 import { SONGS } from './songs/index.js';
 import { flattenSong, isRest, buildRun, clampLoop } from './game/song.js';
 import { createTracker } from './game/tracker.js';
-import { createScore, scoreNote } from './game/score.js';
+import { createScore, scoreFound, scoreEnded, starsFor } from './game/score.js';
 import { estimateBeatSeconds, beatToBpm, bpmToBeat, CALIBRATION_NOTES, DEFAULT_BPM } from './game/tempo.js';
 import { detectPitch, rms } from './music/pitch.js';
 import { freqToNote, nameWithSlack, acceptOctave } from './music/noteName.js';
@@ -231,6 +231,7 @@ function resetRun() {
   game.total = run.lapNotes;
   game.tracker = createTracker(game.items, { beatSeconds: bpmToBeat(game.bpm), ...instrument.tracker });
   game.score = createScore();
+  game.rightNotes = [];
   game.onsets = [];
   view.setSong(game.items, { keySignature: game.song.keySignature });
   view.showIndex(game.tracker.state().index);
@@ -391,17 +392,33 @@ function handleEvent(ev) {
       if (game.calibrating) calibrate(ev);
       break;
     case 'complete': {
-      const { state, milestone } = scoreNote(game.score, ev.firstTry);
+      // step 1: the note is found; its length is scored when it ends ('released')
+      game.rightNotes[ev.index] = ev.rightNote;
+      const { state, gained } = scoreFound(game.score, { rightNote: ev.rightNote, factor: pointsFactor() });
       game.score = state;
       view.setScore(state, scoreProgress());
-      if (ev.firstTry) flashPlus();
-      if (milestone) view.popup(`${t('play.great')} ${t('play.streak', { n: milestone })}`);
+      if (gained) flashPlus(`+${gained}`);
       const next = game.tracker.state().index;
       if (next >= 0) {
         view.showIndex(next);
         const lap = game.items[next].lap;
         if (lap > game.items[ev.index].lap) view.popup(t('loop.lap', { n: lap + 1 }));
       }
+      break;
+    }
+    case 'released': {
+      // Length can't be judged before the tempo is known, nor on the piano (the sound fades).
+      const lengthOk = ev.lengthOk || game.calibrating || instrument.judgeLength === false;
+      const r = scoreEnded(game.score, { rightNote: game.rightNotes[ev.index] ?? true, lengthOk, factor: pointsFactor() });
+      game.score = r.state;
+      view.setScore(r.state, scoreProgress());
+      const parts = [];
+      if (r.length) parts.push(`+${r.length} ♪`);
+      else parts.push(`♪ ${t(ev.too === 'long' ? 'score.long' : 'score.short')}`);
+      if (r.bonus) parts.push(`+${r.bonus} 🔥`);
+      if (r.lostBonus) parts.push('💔');
+      flashPlus(parts.join('  '));
+      if (r.milestone) view.popup(`${t('play.great')} ${t('play.streak', { n: r.milestone })}`);
       break;
     }
     case 'resume':
@@ -433,9 +450,12 @@ function calibrate(ev) {
   updateTempoPill();
 }
 
-function flashPlus() {
+// Exam mode (only the staff is shown) counts double.
+const pointsFactor = () => (exam && view === views.belt ? 2 : 1);
+
+function flashPlus(text) {
   const el = $('plus');
-  el.textContent = '+10';
+  el.textContent = text;
   el.classList.remove('show');
   void el.offsetWidth;
   el.classList.add('show');
@@ -456,7 +476,9 @@ function renderDone() {
   $('done-title').textContent = t('done.title', { name });
   $('done-played').textContent = t('done.played', { song: game.song.title });
   $('done-points').textContent = `⭐ ${t('done.points', { points: game.score.points })}`;
-  $('done-first').textContent = t('done.firstTry', { n: game.score.firstTry, total: game.score.notes });
+  $('done-first').textContent = t('done.perfect', { n: game.score.perfect, total: game.score.notes });
+  const stars = starsFor(game.score);
+  $('done-stars').innerHTML = [1, 2, 3].map((k) => `<span class="${k <= stars ? 'on' : ''}">★</span>`).join('');
 }
 
 function showMicError(err) {

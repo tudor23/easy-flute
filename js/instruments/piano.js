@@ -9,5 +9,6 @@ export default {
   // the right note one octave up or down still counts (MI is often heard an octave high)
   octaveSlack: 1,
   tracker: { holdFraction: 0, minHold: 0.08 },
+  judgeLength: false, // the sound fades (and the pedal stretches it), so length isn't scored
   synthShift: 0.5,
 };

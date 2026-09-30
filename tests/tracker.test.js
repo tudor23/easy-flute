@@ -13,7 +13,13 @@ function player(tracker) {
     for (; t < end; t += STEP) events.push(...tracker.update({ t, note, rms }));
     return api;
   };
-  const api = { play, rest: (s) => play(null, s, 0), events, types: () => events.map((e) => e.type) };
+  // types(): how the song moves on (without the length judgements); all(): every event type
+  const api = {
+    play, rest: (s) => play(null, s, 0), events,
+    types: () => events.filter((e) => e.type !== 'released').map((e) => e.type),
+    all: () => events.map((e) => e.type),
+    released: () => events.filter((e) => e.type === 'released'),
+  };
   return api;
 }
 
@@ -23,7 +29,7 @@ test('a correct note held long enough completes on the first try', () => {
   const tr = createTracker([item('MI'), item('SI')]);
   const p = player(tr).play('MI', 0.45);
   assert.deepEqual(p.types(), ['start', 'complete']);
-  assert.equal(p.events[1].firstTry, true);
+  assert.equal(p.events[1].rightNote, true);
   assert.equal(tr.state().index, 1);
 });
 
@@ -41,13 +47,15 @@ test('hold progress grows while holding', () => {
   assert.ok(s.progress > 0.4 && s.progress < 0.6, String(s.progress));
 });
 
-test('stopping too early is not a completion and costs the first try', () => {
+test('stopping too early is not a completion, and the length then counts as wrong', () => {
   const tr = createTracker([item('MI'), item('SI')]);
   const p = player(tr).play('MI', 0.15).rest(0.2);
   assert.deepEqual(p.types(), ['start', 'early']);
   p.play('MI', 0.4);
   assert.equal(p.events.at(-1).type, 'complete');
-  assert.equal(p.events.at(-1).firstTry, false);
+  assert.equal(p.events.at(-1).rightNote, true);
+  p.rest(0.1);
+  assert.equal(p.released()[0].lengthOk, false);
 });
 
 test('stopping early keeps the progress, and playing again continues from there', () => {
@@ -61,7 +69,7 @@ test('stopping early keeps the progress, and playing again continues from there'
   assert.ok(tr.state().progress > kept);
   p.play('MI', 0.1);
   assert.deepEqual(p.types(), ['start', 'early', 'resume', 'complete']);
-  assert.equal(p.events.at(-1).firstTry, false);
+  assert.equal(p.events.at(-1).rightNote, true);
 });
 
 test('a wrong note is reported once and the song waits', () => {
@@ -72,14 +80,14 @@ test('a wrong note is reported once and the song waits', () => {
   assert.equal(tr.state().heard, 'LA');
   p.play('MI', 0.4);
   assert.deepEqual(p.types(), ['wrong', 'start', 'complete']);
-  assert.equal(p.events.at(-1).firstTry, false);
+  assert.equal(p.events.at(-1).rightNote, false);
 });
 
 test('a short glitch of another note is not a wrong note', () => {
   const tr = createTracker([item('MI'), item('SI')]);
   const p = player(tr).play('FA', 0.1).play('MI', 0.4);
   assert.deepEqual(p.types(), ['start', 'complete']);
-  assert.equal(p.events[1].firstTry, true);
+  assert.equal(p.events[1].rightNote, true);
 });
 
 test('holding one SI does not play both SI SI', () => {
@@ -106,22 +114,79 @@ test('a breath wobble under 80 ms does not break the note', () => {
   const tr = createTracker([item('MI'), item('SI')]);
   const p = player(tr).play('MI', 0.15).rest(0.05).play('MI', 0.25);
   assert.deepEqual(p.types(), ['start', 'complete']);
-  assert.equal(p.events[1].firstTry, true);
+  assert.equal(p.events[1].rightNote, true);
 });
 
 test('still holding the previous note is not a wrong note', () => {
   const tr = createTracker([item('SI'), item('LA')]);
-  const p = player(tr).play('SI', 0.9).play('LA', 0.4);
+  const p = player(tr).play('SI', 0.9).play('LA', 0.4).rest(0.1);
   assert.deepEqual(p.types(), ['start', 'complete', 'start', 'complete', 'done']);
-  assert.equal(p.events[3].firstTry, true);
+  assert.equal(p.events.filter((e) => e.type === 'complete')[1].rightNote, true);
 });
 
 test('rests are skipped and the song finishes', () => {
   const tr = createTracker([item('MI', 1), item('rest', 1)]);
-  const p = player(tr).play('MI', 0.7);
+  const p = player(tr).play('MI', 0.7).rest(0.1);
   assert.deepEqual(p.types(), ['start', 'complete', 'done']);
   assert.equal(tr.state().phase, 'done');
   assert.deepEqual(tr.update({ t: 5, note: 'MI', rms: 0.2 }), []);
+});
+
+test('a wrong note shorter than 0.3 s gets the hint but still counts as the right note', () => {
+  const tr = createTracker([item('MI'), item('SI')]);
+  const p = player(tr).play('LA', 0.2).play('MI', 0.4);
+  assert.deepEqual(p.types(), ['wrong', 'start', 'complete']);
+  assert.equal(p.events.at(-1).rightNote, true);
+});
+
+// Length: an eighth at 1 s a beat is written 0.5 s long; the right length is 0.35..0.75 s.
+test('the right length is reported when the note stops', () => {
+  const tr = createTracker([item('MI'), item('SI')], { beatSeconds: 1 });
+  const p = player(tr).play('MI', 0.5).rest(0.1);
+  assert.deepEqual(p.all(), ['start', 'complete', 'released']);
+  const [r] = p.released();
+  assert.equal(r.index, 0);
+  assert.equal(r.lengthOk, true);
+  assert.ok(Math.abs(r.held - 0.5) < 0.02, String(r.held));
+});
+
+test('too short: long enough to move on, but under 70%', () => {
+  const tr = createTracker([item('MI'), item('SI')], { beatSeconds: 1 });
+  const p = player(tr).play('MI', 0.3).rest(0.1);
+  assert.equal(p.released()[0].lengthOk, false);
+});
+
+test('too long is judged while the note is still sounding, and only once', () => {
+  const tr = createTracker([item('MI'), item('SI')], { beatSeconds: 1 });
+  const p = player(tr).play('MI', 0.8);
+  assert.deepEqual(p.all(), ['start', 'complete', 'released']);
+  assert.equal(p.released()[0].lengthOk, false);
+  p.play('MI', 0.5).rest(0.1);
+  assert.equal(p.released().length, 1);
+});
+
+test('going straight to the next note ends the previous one', () => {
+  const tr = createTracker([item('MI'), item('SI'), item('LA')], { beatSeconds: 1 });
+  const p = player(tr).play('MI', 0.5).play('SI', 0.3);
+  assert.deepEqual(p.all(), ['start', 'complete', 'released', 'start', 'complete']);
+  assert.equal(p.released()[0].lengthOk, true);
+});
+
+test('SI SI: the re-attack ends the first SI', () => {
+  const tr = createTracker([item('SI'), item('SI'), item('LA')], { beatSeconds: 1 });
+  const p = player(tr).play('SI', 0.45, 0.2).play('SI', 0.05, 0.05).play('SI', 0.3, 0.2);
+  const [r] = p.released();
+  assert.equal(r.index, 0);
+  assert.equal(r.lengthOk, true);
+});
+
+test('the song is done only after the last note has been released', () => {
+  const tr = createTracker([item('MI')], { beatSeconds: 1 });
+  const p = player(tr).play('MI', 0.5);
+  assert.deepEqual(p.all(), ['start', 'complete']);
+  assert.equal(tr.state().phase, 'finishing');
+  p.rest(0.1);
+  assert.deepEqual(p.all(), ['start', 'complete', 'released', 'done']);
 });
 
 test('a leading rest is skipped', () => {
